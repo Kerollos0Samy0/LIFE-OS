@@ -1,0 +1,324 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile, work schedule, personalization settings, and currency preferences.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "displayName": { "type": "string", "maxLength": 120 },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "language": { "type": "string", "enum": ["ar", "en"] },
+        "currency": { "type": "string", "maxLength": 10 },
+        "dailyWorkHours": { "type": "number" },
+        "workStartHour": { "type": "number" },
+        "workEndHour": { "type": "number" },
+        "targetSleepHours": { "type": "number" },
+        "peakConcentration": { "type": "string", "enum": ["morning", "afternoon", "evening"] },
+        "financialGoal": { "type": "string", "maxLength": 200 },
+        "smartphone": { "type": "string", "maxLength": 60 },
+        "smartwatch": { "type": "string", "maxLength": 80 },
+        "dailyStepTarget": { "type": "number" },
+        "aiDefaultModel": { "type": "string", "enum": ["gemini-3.1-flash-lite", "gemini-4-hydrogen"] },
+        "aiDailyLimit": { "type": "number" },
+        "liabilitiesPiasters": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "displayName", "language", "currency", "dailyWorkHours", "peakConcentration", "createdAt", "updatedAt"]
+    },
+    "IncomeRecord": {
+      "title": "IncomeRecord",
+      "description": "Salary, freelance project, or additional income record stored in integer piasters.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "maxLength": 160 },
+        "amountPiasters": { "type": "number" },
+        "paidAmountPiasters": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "source": { "type": "string", "enum": ["fixed_salary", "freelance", "additional"] },
+        "status": { "type": "string", "enum": ["expected", "invoiced", "partially_paid", "fully_paid", "overdue"] },
+        "dateReceived": { "type": "string", "maxLength": 32 },
+        "expectedPaymentDate": { "type": "string", "maxLength": 32 },
+        "projectName": { "type": "string", "maxLength": 120 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "amountPiasters", "paidAmountPiasters", "currency", "source", "status", "expectedPaymentDate", "createdAt", "updatedAt"]
+    },
+    "ExpenseRecord": {
+      "title": "ExpenseRecord",
+      "description": "Personal expense transaction stored in integer piasters.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "description": { "type": "string", "maxLength": 200 },
+        "amountPiasters": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "category": { "type": "string", "maxLength": 60 },
+        "date": { "type": "string", "maxLength": 32 },
+        "paymentMethod": { "type": "string", "enum": ["cash", "card", "instapay", "wallet", "bank_transfer"] },
+        "entrySource": { "type": "string", "enum": ["manual", "voice", "receipt", "notification", "email_import"] },
+        "recurring": { "type": "boolean" },
+        "notes": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "description", "amountPiasters", "currency", "category", "date", "paymentMethod", "entrySource", "recurring", "createdAt", "updatedAt"]
+    },
+    "Budget": {
+      "title": "Budget",
+      "description": "Monthly overall or category-specific spending budget in piasters.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "category": { "type": "string", "maxLength": 60 },
+        "monthKey": { "type": "string", "maxLength": 10 },
+        "limitPiasters": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "category", "monthKey", "limitPiasters", "createdAt", "updatedAt"]
+    },
+    "SavingsGoal": {
+      "title": "SavingsGoal",
+      "description": "Targeted savings bucket stored in integer piasters.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "maxLength": 140 },
+        "category": { "type": "string", "enum": ["emergency", "purchases", "education", "travel", "investments", "custom"] },
+        "targetPiasters": { "type": "number" },
+        "currentPiasters": { "type": "number" },
+        "targetDate": { "type": "string", "maxLength": 32 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "category", "targetPiasters", "currentPiasters", "targetDate", "createdAt", "updatedAt"]
+    },
+    "InvestmentAsset": {
+      "title": "InvestmentAsset",
+      "description": "Manual investment portfolio holding with explicit manual valuation tracking.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "maxLength": 140 },
+        "category": { "type": "string", "enum": ["gold", "stocks", "mutual_funds", "etfs", "other"] },
+        "quantity": { "type": "number" },
+        "purchasePricePiasters": { "type": "number" },
+        "currentValuationPiasters": { "type": "number" },
+        "feesPiasters": { "type": "number" },
+        "realizedPnlPiasters": { "type": "number" },
+        "purchaseDate": { "type": "string", "maxLength": 32 },
+        "valuationSource": { "type": "string", "enum": ["manual", "verified_market"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "category", "quantity", "purchasePricePiasters", "currentValuationPiasters", "feesPiasters", "realizedPnlPiasters", "purchaseDate", "valuationSource", "createdAt", "updatedAt"]
+    },
+    "TaskItem": {
+      "title": "TaskItem",
+      "description": "Scheduled or backlog personal/work task.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 600 },
+        "priority": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+        "category": { "type": "string", "enum": ["deep_work", "admin", "meetings", "personal", "rest", "commute"] },
+        "status": { "type": "string", "enum": ["todo", "in_progress", "completed"] },
+        "deadline": { "type": "string", "maxLength": 32 },
+        "scheduledStart": { "type": "string", "maxLength": 16 },
+        "estimatedMinutes": { "type": "number" },
+        "actualMinutes": { "type": "number" },
+        "project": { "type": "string", "maxLength": 120 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "priority", "category", "status", "deadline", "estimatedMinutes", "actualMinutes", "createdAt", "updatedAt"]
+    },
+    "CalendarEvent": {
+      "title": "CalendarEvent",
+      "description": "Personal or work scheduled calendar event.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "maxLength": 200 },
+        "calendarType": { "type": "string", "enum": ["work", "personal"] },
+        "date": { "type": "string", "maxLength": 32 },
+        "startTime": { "type": "string", "maxLength": 16 },
+        "endTime": { "type": "string", "maxLength": 16 },
+        "notes": { "type": "string", "maxLength": 400 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "calendarType", "date", "startTime", "endTime", "createdAt", "updatedAt"]
+    },
+    "FocusSession": {
+      "title": "FocusSession",
+      "description": "Completed Pomodoro or custom focus session.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "label": { "type": "string", "maxLength": 140 },
+        "durationMinutes": { "type": "number" },
+        "distractions": { "type": "number" },
+        "date": { "type": "string", "maxLength": 32 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "label", "durationMinutes", "distractions", "date", "createdAt"]
+    },
+    "HealthLog": {
+      "title": "HealthLog",
+      "description": "Daily health metrics with explicit source and availability metadata.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "date": { "type": "string", "maxLength": 32 },
+        "sleepHours": { "type": "number" },
+        "sleepBedtime": { "type": "string", "maxLength": 16 },
+        "steps": { "type": "number" },
+        "activeCalories": { "type": "number" },
+        "restingHeartRate": { "type": "number" },
+        "source": { "type": "string", "enum": ["manual", "health_connect", "xiaomi_band"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date", "source", "createdAt", "updatedAt"]
+    },
+    "AppUsageLog": {
+      "title": "AppUsageLog",
+      "description": "Daily digital wellbeing app usage duration in minutes by category.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "date": { "type": "string", "maxLength": 32 },
+        "productivityMinutes": { "type": "number" },
+        "communicationMinutes": { "type": "number" },
+        "socialMediaMinutes": { "type": "number" },
+        "entertainmentMinutes": { "type": "number" },
+        "educationMinutes": { "type": "number" },
+        "otherMinutes": { "type": "number" },
+        "nighttimeMinutes": { "type": "number" },
+        "interruptions": { "type": "number" },
+        "source": { "type": "string", "enum": ["manual", "usage_stats"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date", "productivityMinutes", "socialMediaMinutes", "nighttimeMinutes", "source", "createdAt", "updatedAt"]
+    },
+    "EnergyLog": {
+      "title": "EnergyLog",
+      "description": "Self-reported energy, mood, focus, and stress check-in.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "date": { "type": "string", "maxLength": 32 },
+        "energyLevel": { "type": "number" },
+        "moodLevel": { "type": "number" },
+        "focusLevel": { "type": "number" },
+        "stressLevel": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 300 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date", "energyLevel", "moodLevel", "focusLevel", "stressLevel", "createdAt"]
+    },
+    "PersonalGoal": {
+      "title": "PersonalGoal",
+      "description": "Personal goal with category, progress, deadline, and bounded milestone titles.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "maxLength": 180 },
+        "description": { "type": "string", "maxLength": 500 },
+        "category": { "type": "string", "enum": ["financial", "professional", "educational", "health", "personal", "social"] },
+        "targetLabel": { "type": "string", "maxLength": 120 },
+        "startDate": { "type": "string", "maxLength": 32 },
+        "deadline": { "type": "string", "maxLength": 32 },
+        "progress": { "type": "number" },
+        "milestones": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "category", "targetLabel", "deadline", "progress", "createdAt", "updatedAt"]
+    },
+    "DailyMicroGoal": {
+      "title": "DailyMicroGoal",
+      "description": "Single-day actionable micro-goal with target, current progress, and unit displayed on the home dashboard.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "date": { "type": "string", "maxLength": 32 },
+        "title": { "type": "string", "maxLength": 140 },
+        "category": { "type": "string", "enum": ["focus", "finance", "health", "wellbeing", "personal"] },
+        "targetValue": { "type": "number" },
+        "currentValue": { "type": "number" },
+        "unit": { "type": "string", "maxLength": 32 },
+        "completed": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date", "title", "category", "targetValue", "currentValue", "unit", "completed", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private user profile and personalization settings, readable and writable only by the owner."
+    },
+    "/users/{userId}/income_records/{recordId}": {
+      "schema": { "$ref": "#/entities/IncomeRecord" },
+      "description": "Owner-scoped income records."
+    },
+    "/users/{userId}/expense_records/{recordId}": {
+      "schema": { "$ref": "#/entities/ExpenseRecord" },
+      "description": "Owner-scoped expense records."
+    },
+    "/users/{userId}/budgets/{budgetId}": {
+      "schema": { "$ref": "#/entities/Budget" },
+      "description": "Owner-scoped monthly and category budgets."
+    },
+    "/users/{userId}/savings_goals/{goalId}": {
+      "schema": { "$ref": "#/entities/SavingsGoal" },
+      "description": "Owner-scoped savings goals."
+    },
+    "/users/{userId}/investments/{investmentId}": {
+      "schema": { "$ref": "#/entities/InvestmentAsset" },
+      "description": "Owner-scoped manual investment portfolio holdings."
+    },
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/TaskItem" },
+      "description": "Owner-scoped tasks."
+    },
+    "/users/{userId}/calendar_events/{eventId}": {
+      "schema": { "$ref": "#/entities/CalendarEvent" },
+      "description": "Owner-scoped calendar events."
+    },
+    "/users/{userId}/focus_sessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/FocusSession" },
+      "description": "Owner-scoped focus timer sessions."
+    },
+    "/users/{userId}/health_logs/{logId}": {
+      "schema": { "$ref": "#/entities/HealthLog" },
+      "description": "Owner-scoped health and sleep logs."
+    },
+    "/users/{userId}/app_usage/{usageId}": {
+      "schema": { "$ref": "#/entities/AppUsageLog" },
+      "description": "Owner-scoped digital wellbeing app usage logs."
+    },
+    "/users/{userId}/energy_logs/{logId}": {
+      "schema": { "$ref": "#/entities/EnergyLog" },
+      "description": "Owner-scoped self-reported energy check-in logs."
+    },
+    "/users/{userId}/goals/{goalId}": {
+      "schema": { "$ref": "#/entities/PersonalGoal" },
+      "description": "Owner-scoped personal goals."
+    },
+    "/users/{userId}/daily_micro_goals/{goalId}": {
+      "schema": { "$ref": "#/entities/DailyMicroGoal" },
+      "description": "Owner-scoped daily micro-goals displayed at the top of the dashboard."
+    }
+  }
+}
