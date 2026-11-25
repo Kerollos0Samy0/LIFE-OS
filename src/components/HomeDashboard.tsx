@@ -227,7 +227,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
             className="min-h-[44px] px-4 py-2 rounded-xl bg-[#13171C] border border-[#232A33] text-sm font-medium text-[#E2E8F0] hover:border-emerald-500/50 transition-colors flex items-center gap-2 whitespace-nowrap"
           >
             <Sparkles className="w-4 h-4 text-emerald-400" />
-            {isAr ? 'اسأل LIFE AI' : 'Ask LIFE AI'}
+            {isAr ? 'اسأل KYVORA AI' : 'Ask KYVORA AI'}
           </button>
         </div>
       </section>

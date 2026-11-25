@@ -119,8 +119,8 @@ export const WellbeingModule: React.FC = () => {
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
               {isAr
-                ? 'خصوصية صارمة: لا يجمع LIFE OS أبداً محتوى الرسائل أو كلمات المرور أو نقرات لوحة المفاتيح. الجمع التلقائي يتطلب إذن Android Usage Stats على هاتف Android.'
-                : 'Strict privacy: LIFE OS never collects message contents, passwords, or keystrokes. Automatic capture requires Android Usage Stats permission on Android.'}
+                ? 'خصوصية صارمة: لا يجمع KYVORA أبداً محتوى الرسائل أو كلمات المرور أو نقرات لوحة المفاتيح. الجمع التلقائي يتطلب إذن Android Usage Stats على هاتف Android.'
+                : 'Strict privacy: KYVORA never collects message contents, passwords, or keystrokes. Automatic capture requires Android Usage Stats permission on Android.'}
             </p>
           </div>
         </div>

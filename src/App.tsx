@@ -68,9 +68,12 @@ function LifeOsShell() {
           <button
             type="button"
             onClick={() => handleNavigate('home')}
-            className="text-lg font-bold tracking-tight text-[#F4F6F8] whitespace-nowrap shrink-0"
+            className="text-lg font-bold tracking-tight text-[#F4F6F8] whitespace-nowrap shrink-0 flex items-center gap-2.5"
           >
-            LIFE OS
+            <img src="/logo.png" alt="KYVORA" className="w-8 h-8 rounded-lg shadow-md shrink-0 object-cover" />
+            <span className="tracking-wider bg-gradient-to-r from-white via-slate-100 to-amber-200 bg-clip-text text-transparent font-black">
+              KYVORA
+            </span>
           </button>
         </div>
 
@@ -172,9 +175,12 @@ function LifeOsShell() {
           <button
             type="button"
             onClick={() => handleNavigate('home')}
-            className="text-base font-bold tracking-tight text-[#F4F6F8] whitespace-nowrap shrink-0"
+            className="text-base font-bold tracking-tight text-[#F4F6F8] whitespace-nowrap shrink-0 flex items-center gap-2"
           >
-            LIFE OS
+            <img src="/logo.png" alt="KYVORA" className="w-6 h-6 rounded-md shrink-0 object-cover" />
+            <span className="tracking-wider bg-gradient-to-r from-white via-slate-100 to-amber-200 bg-clip-text text-transparent font-black">
+              KYVORA
+            </span>
           </button>
 
           <span className="text-xs font-medium text-[#8E99A8] truncate">{navLabels[activeNav]}</span>

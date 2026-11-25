@@ -1,19 +1,30 @@
+# KYVORA
+
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+  <img src="public/logo.png" width="160" height="160" alt="KYVORA Logo" style="border-radius: 24px;" />
+  <h3>افهم حياتك. أدر مستقبلك.</h3>
+  <p>منصة إدارة الحياة والذكاء الشخصي الشاملة — المالية، الوقت، الصحة، والعافية الرقمية</p>
 </div>
 
-# Run and deploy your AI Studio app
+---
 
-This contains everything you need to run your app locally.
-https://ai.studio/apps/4e76f6c4-b539-4410-a0da-2f24f693cedc
+## الميزات الرئيسية / Core Features
+- 💰 **إدارة المالية والمصاريف الذكية**: تحليل بالصوت والنصوص المصرية عبر Gemini API.
+- ⏱️ **إدارة الوقت والإنتاجية**: تتبع ساعات التركيز والمهام المصغرة.
+- 🏃‍♂️ **الصحة ومستوى الطاقة**: تتبع النوم، الخطوات، ومعدل ضربات القلب.
+- 🤖 **KYVORA AI**: مساعد ذكي متكامل متعدد النماذج.
+- 📱 **Progressive Web App (PWA) & APK**: تثبيت فوري على الهواتف والكمبيوتر.
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## التشغيل محلياً / Run Locally
+1. تثبيت الاعتماديات:
+   ```bash
+   npm install
+   ```
+2. ضبط مفتاح Gemini في `.env`:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
+3. تشغيل التطبيق:
+   ```bash
+   npm run dev
+   ```

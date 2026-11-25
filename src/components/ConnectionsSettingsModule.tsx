@@ -154,12 +154,12 @@ export const ConnectionsSettingsModule: React.FC<ConnectionsSettingsProps> = ({ 
           : 'Uses least-privilege event scopes and always confirms before deleting events.',
       },
       {
-        name: 'Google Drive (LIFE OS Folder)',
+        name: 'Google Drive (KYVORA Folder)',
         status: isAr ? 'يتطلب تفعيل OAuth (تصدير JSON محلي متاح)' : 'OAuth Not Enabled (Local JSON Export Ready)',
         live: false,
         privacy: isAr
-          ? 'يصل فقط لمجلد LIFE OS المخصص للنسخ الاحتياطي والتقارير.'
-          : 'Uses narrowest drive.file permissions strictly for LIFE OS exports and backups.',
+          ? 'يصل فقط لمجلد KYVORA المخصص للنسخ الاحتياطي والتقارير.'
+          : 'Uses narrowest drive.file permissions strictly for KYVORA exports and backups.',
       },
       {
         name: 'Gmail (Read-Only Financial Emails)',

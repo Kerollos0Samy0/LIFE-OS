@@ -389,8 +389,8 @@ export const HealthEnergyModule: React.FC = () => {
               <p className="font-semibold text-[#F4F6F8]">{isAr ? 'مسار الربط الصحيح والموثوق' : 'Supported Standardized Integration Path'}</p>
               <p className="leading-relaxed">
                 {isAr
-                  ? 'لا تعتمد أجهزة Xiaomi Smart Band على API عام مباشر لكل القياسات؛ لذلك يعتمد LIFE OS على Android Health Connect كطبقة قياسية بعد تفعيل المزامنة داخل Mi Fitness.'
-                  : 'Xiaomi wearables do not expose every metric through a public cloud API; LIFE OS uses Android Health Connect as the standardized layer synced from Mi Fitness.'}
+                  ? 'لا تعتمد أجهزة Xiaomi Smart Band على API عام مباشر لكل القياسات؛ لذلك يعتمد KYVORA على Android Health Connect كطبقة قياسية بعد تفعيل المزامنة داخل Mi Fitness.'
+                  : 'Xiaomi wearables do not expose every metric through a public cloud API; KYVORA uses Android Health Connect as the standardized layer synced from Mi Fitness.'}
               </p>
             </div>
             <div className="space-y-2">

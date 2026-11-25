@@ -1,7 +1,7 @@
 {
-  "short_name": "LIFE OS",
-  "name": "LIFE OS — افهم حياتك. أدر مستقبلك.",
-  "description": "منصة إدارة الحياة والذكاء الشخصي الشاملة",
+  "short_name": "KYVORA",
+  "name": "KYVORA — افهم حياتك. أدر مستقبلك.",
+  "description": "KYVORA — منصة إدارة الحياة والذكاء الشخصي الشاملة",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -18,7 +18,7 @@
   ],
   "start_url": "/",
   "background_color": "#0B0D10",
-  "theme_color": "#10B981",
+  "theme_color": "#0B0D10",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/"

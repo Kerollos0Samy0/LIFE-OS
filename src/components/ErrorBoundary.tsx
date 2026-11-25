@@ -16,7 +16,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
   }
 
   componentDidCatch(error: Error) {
-    console.error('LIFE OS ErrorBoundary caught:', error);
+    console.error('KYVORA ErrorBoundary caught:', error);
   }
 
   render() {
@@ -24,7 +24,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
       return (
         <div className="min-h-screen bg-[#0B0D10] text-[#F4F6F8] flex items-center justify-center p-6">
           <div className="max-w-lg w-full bg-[#13171C] border border-[#232A33] rounded-2xl p-6 space-y-4">
-            <h1 className="text-lg font-semibold text-red-400">حدث خطأ غير متوقع — LIFE OS</h1>
+            <h1 className="text-lg font-semibold text-red-400">حدث خطأ غير متوقع — KYVORA</h1>
             <p className="text-sm text-[#8E99A8] leading-relaxed">
               توقف عرض الشاشة الحالية لحماية بياناتك. يمكنك إعادة تحميل التطبيق أو مراجعة تفاصيل الخطأ أدناه.
             </p>

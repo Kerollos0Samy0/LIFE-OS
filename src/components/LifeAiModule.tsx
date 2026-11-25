@@ -28,8 +28,8 @@ export const LifeAiModule: React.FC = () => {
       id: 'welcome-ai',
       role: 'assistant',
       content: isAr
-        ? 'أهلاً بك في LIFE AI. بقرأ فقط البيانات المطلوبة لسؤالك (المالية، الإنتاجية، الصحة، أو المراجعة الأسبوعية) وبستأذنك قبل تنفيذ أي تعديل أو إضافة.'
-        : 'Welcome to LIFE AI. I query only the minimum scoped context for your question and always ask for confirmation before saving any changes.',
+        ? 'أهلاً بك في KYVORA AI. بقرأ فقط البيانات المطلوبة لسؤالك (المالية، الإنتاجية، الصحة، أو المراجعة الأسبوعية) وبستأذنك قبل تنفيذ أي تعديل أو إضافة.'
+        : 'Welcome to KYVORA AI. I query only the minimum scoped context for your question and always ask for confirmation before saving any changes.',
       timestamp: TODAY_ISO,
     },
   ]);
@@ -208,7 +208,7 @@ export const LifeAiModule: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-[#F4F6F8] flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-emerald-400" />
-            LIFE AI
+            KYVORA AI
           </h1>
           <p className="text-xs text-[#8E99A8] mt-1">
             {isAr
@@ -319,7 +319,7 @@ export const LifeAiModule: React.FC = () => {
           {loading ? (
             <div className="flex items-center gap-2 text-xs text-[#8E99A8]">
               <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
-              {isAr ? 'LIFE AI يحلل بياناتك المحددة...' : 'LIFE AI is analyzing your scoped metrics...'}
+              {isAr ? 'KYVORA AI يحلل بياناتك المحددة...' : 'KYVORA AI is analyzing your scoped metrics...'}
             </div>
           ) : null}
         </div>
@@ -355,7 +355,7 @@ export const LifeAiModule: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={isAr ? 'اسأل عن مصاريفك، مهامك، نومك، أو اطلب مراجعة أسبوعية...' : 'Ask about spending, schedule, sleep, or weekly review...'}
-            aria-label={isAr ? 'رسالة إلى LIFE AI' : 'Message LIFE AI'}
+            aria-label={isAr ? 'رسالة إلى KYVORA AI' : 'Message KYVORA AI'}
             className="flex-1 min-h-[44px] px-4 rounded-xl bg-[#0B0D10] border border-[#232A33] text-sm text-[#F4F6F8] focus:outline-none focus:border-emerald-500"
           />
           <button

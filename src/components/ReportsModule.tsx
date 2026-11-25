@@ -150,10 +150,10 @@ export const ReportsModule: React.FC = () => {
           <div>
             <h2 className="text-lg font-bold text-[#F4F6F8]">
               {period === 'daily'
-                ? isAr ? `تقرير LIFE OS اليومي — ${TODAY_ISO}` : `LIFE OS Daily Report — ${TODAY_ISO}`
+                ? isAr ? `تقرير KYVORA اليومي — ${TODAY_ISO}` : `KYVORA Daily Report — ${TODAY_ISO}`
                 : period === 'weekly'
-                  ? isAr ? 'تقرير LIFE OS الأسبوعي' : 'LIFE OS Weekly Report'
-                  : isAr ? `تقرير LIFE OS الشهري — ${CURRENT_MONTH}` : `LIFE OS Monthly Report — ${CURRENT_MONTH}`}
+                  ? isAr ? 'تقرير KYVORA الأسبوعي' : 'KYVORA Weekly Report'
+                  : isAr ? `تقرير KYVORA الشهري — ${CURRENT_MONTH}` : `KYVORA Monthly Report — ${CURRENT_MONTH}`}
             </h2>
             <p className="text-xs text-[#8E99A8] mt-0.5">{data.profile.displayName} · {data.profile.currency}</p>
           </div>
