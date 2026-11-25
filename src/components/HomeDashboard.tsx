@@ -166,9 +166,14 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
         peakConcentration: data.profile.peakConcentration,
       };
 
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (data.profile.customGeminiApiKey) {
+        headers['x-gemini-api-key'] = data.profile.customGeminiApiKey;
+      }
+
       const res = await fetch('/api/ai/briefing', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ language: lang, summary: payload }),
       });
       const json = await res.json();

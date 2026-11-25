@@ -84,9 +84,14 @@ export const VoiceExpenseModal: React.FC<VoiceExpenseModalProps> = ({ open, onCl
     setIsParsing(true);
 
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (data.profile.customGeminiApiKey) {
+        headers['x-gemini-api-key'] = data.profile.customGeminiApiKey;
+      }
+
       const res = await fetch('/api/ai/parse-expense', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           text: inputText.trim(),
           sourceType: 'voice',

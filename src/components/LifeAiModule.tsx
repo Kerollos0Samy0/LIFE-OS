@@ -10,16 +10,16 @@ import {
   egpToPiasters,
 } from '../utils/finance';
 import { calculateEnergyEstimate } from '../utils/energy';
-import type { AiChatMessage, AiModelId, TaskCategory, TaskPriority } from '../types/lifeos';
+import type { AiChatMessage, AiModelId, HabitCategory, HabitTimeOfDay, TaskCategory, TaskPriority } from '../types/lifeos';
 
 type AiDomain = 'general' | 'finance' | 'productivity' | 'health';
 
 export const LifeAiModule: React.FC = () => {
-  const { data, lang, recordAiUsage, addExpense, addTask } = useLifeOs();
+  const { data, lang, recordAiUsage, addExpense, addTask, addHabit } = useLifeOs();
   const isAr = lang === 'ar';
 
   const [domain, setDomain] = useState<AiDomain>('general');
-  const [model, setModel] = useState<AiModelId>(data.profile.aiDefaultModel);
+  const [model, setModel] = useState<AiModelId>(data.profile.aiDefaultModel || 'gemini-3.5-flash');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -28,21 +28,81 @@ export const LifeAiModule: React.FC = () => {
       id: 'welcome-ai',
       role: 'assistant',
       content: isAr
-        ? 'أهلاً بك في KYVORA AI. بقرأ فقط البيانات المطلوبة لسؤالك (المالية، الإنتاجية، الصحة، أو المراجعة الأسبوعية) وبستأذنك قبل تنفيذ أي تعديل أو إضافة.'
-        : 'Welcome to KYVORA AI. I query only the minimum scoped context for your question and always ask for confirmation before saving any changes.',
+        ? 'أهلاً بك في KYVORA AI المدعوم بنماذج Google Gemini. أستطيع تحليل عاداتك اليومية، مهامك، مالياتك، وصحتك، واقتراح وتنفيذ خطوات فورية لمساعدتك في إدارة يومك بذكاء.'
+        : 'Welcome to KYVORA AI powered by Google Gemini. I analyze your daily habits, tasks, finances, and energy to give actionable coaching and help you manage your day.',
       timestamp: TODAY_ISO,
     },
   ]);
 
-  // Scoped minimal context selector (never dumps the entire database!)
+  // Unified, comprehensive life context for Gemini
   const scopedContext = useMemo(() => {
+    const todayStr = new Date().toISOString().slice(0, 10);
     const availableCashEgp = calculateAvailableCashPiasters(data.incomeRecords, data.expenseRecords) / 100;
     const paidIncomeEgp = calculateTotalPaidIncomePiasters(data.incomeRecords, CURRENT_MONTH) / 100;
     const monthExpensesEgp = calculateTotalExpensesPiasters(data.expenseRecords, CURRENT_MONTH) / 100;
     const pendingFreelanceEgp = calculatePendingReceivablesPiasters(data.incomeRecords) / 100;
 
-    if (domain === 'finance') {
-      return {
+    const habitsSummary = data.habits.map((h) => ({
+      title: h.title,
+      category: h.category,
+      timeOfDay: h.timeOfDay,
+      streak: h.streak || 0,
+      bestStreak: h.bestStreak || 0,
+      completedToday: h.completedDates.includes(todayStr),
+    }));
+
+    const tasksSummary = data.tasks.map((t) => ({
+      title: t.title,
+      priority: t.priority,
+      category: t.category,
+      status: t.status,
+      deadline: t.deadline,
+      estimatedMinutes: t.estimatedMinutes,
+    }));
+
+    const latestHealth = [...data.healthLogs].sort((a, b) => b.date.localeCompare(a.date))[0] || null;
+    const latestUsage = [...data.appUsageLogs].sort((a, b) => b.date.localeCompare(a.date))[0] || null;
+    const todayMicroGoal = data.dailyMicroGoals.find((g) => g.date === todayStr) || null;
+
+    const energy = calculateEnergyEstimate({
+      healthLogs: data.healthLogs,
+      appUsageLogs: data.appUsageLogs,
+      energyLogs: data.energyLogs,
+      dailyStepTarget: data.profile.dailyStepTarget,
+      targetSleepHours: data.profile.targetSleepHours,
+      peakConcentration: data.profile.peakConcentration,
+    });
+
+    return {
+      todayDate: todayStr,
+      userProfile: {
+        name: data.profile.displayName,
+        workHours: `${data.profile.workStartHour || 9}:00-${data.profile.workEndHour || 17}:00`,
+        peakConcentration: data.profile.peakConcentration,
+        targetSleep: data.profile.targetSleepHours,
+        dailyStepTarget: data.profile.dailyStepTarget,
+        financialGoal: data.profile.financialGoal,
+      },
+      todayMicroGoal: todayMicroGoal
+        ? {
+            title: todayMicroGoal.title,
+            progress: `${todayMicroGoal.currentValue}/${todayMicroGoal.targetValue} ${todayMicroGoal.unit}`,
+            completed: todayMicroGoal.completed,
+          }
+        : null,
+      habits: {
+        total: data.habits.length,
+        completedToday: data.habits.filter((h) => h.completedDates.includes(todayStr)).length,
+        items: habitsSummary,
+      },
+      productivity: {
+        totalTasks: data.tasks.length,
+        completedToday: data.tasks.filter((t) => t.deadline === todayStr && t.status === 'completed').length,
+        pendingToday: data.tasks.filter((t) => t.deadline === todayStr && t.status !== 'completed').length,
+        focusSessionsToday: data.focusSessions.filter((f) => f.date === todayStr).length,
+        tasks: tasksSummary.slice(0, 10),
+      },
+      finances: {
         currency: 'EGP',
         availableCashEgp,
         paidIncomeEgp,
@@ -55,47 +115,22 @@ export const LifeAiModule: React.FC = () => {
           date: e.date,
         })),
         budgetsCount: data.budgets.length,
-        savingsGoalsCount: data.savingsGoals.length,
-      };
-    }
-    if (domain === 'productivity') {
-      return {
-        peakConcentration: data.profile.peakConcentration,
-        workHours: `${data.profile.workStartHour}:00-${data.profile.workEndHour}:00`,
-        pendingTasks: data.tasks
-          .filter((t) => t.status !== 'completed')
-          .slice(0, 6)
-          .map((t) => ({ title: t.title, priority: t.priority, category: t.category, mins: t.estimatedMinutes })),
-        focusSessionsToday: data.focusSessions.filter((f) => f.date === TODAY_ISO).length,
-      };
-    }
-    if (domain === 'health') {
-      const latestHealth = [...data.healthLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
-      const energy = calculateEnergyEstimate({
-        healthLogs: data.healthLogs,
-        appUsageLogs: data.appUsageLogs,
-        energyLogs: data.energyLogs,
-        dailyStepTarget: data.profile.dailyStepTarget,
-        targetSleepHours: data.profile.targetSleepHours,
-        peakConcentration: data.profile.peakConcentration,
-      });
-      return {
-        sleepHours: latestHealth?.sleepHours ?? 'unavailable',
-        steps: latestHealth?.steps ?? 'unavailable',
-        restingHr: latestHealth?.restingHeartRate ?? 'unavailable',
-        estimatedEnergyScore: energy.estimatedScore ?? 'unavailable',
-        nighttimeScreenMins: energy.measuredFactors.nighttimeScreenMinutes ?? 'unavailable',
-      };
-    }
-    return {
-      availableCashEgp,
-      monthExpensesEgp,
-      pendingFreelanceEgp,
-      openTasksCount: data.tasks.filter((t) => t.status !== 'completed').length,
-      activeGoalsCount: data.goals.length,
-      peakConcentration: data.profile.peakConcentration,
+        savingsGoals: data.savingsGoals.map((g) => ({
+          title: g.title,
+          currentEgp: g.currentPiasters / 100,
+          targetEgp: g.targetPiasters / 100,
+        })),
+      },
+      health: {
+        sleepHours: latestHealth?.sleepHours ?? 'غير مسجل',
+        steps: latestHealth?.steps ?? 'غير مسجل',
+        restingHr: latestHealth?.restingHeartRate ?? 'غير مسجل',
+        activeCalories: latestHealth?.activeCalories ?? 'غير مسجل',
+        estimatedEnergyScore: energy.estimatedScore ?? 'غير مسجل',
+        nighttimeScreenMins: latestUsage?.nighttimeMinutes ?? 'غير مسجل',
+      },
     };
-  }, [data, domain]);
+  }, [data]);
 
   const quotaReached = data.aiUsage.requestsToday >= data.profile.aiDailyLimit;
 
@@ -123,21 +158,26 @@ export const LifeAiModule: React.FC = () => {
     setLoading(true);
 
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (data.profile.customGeminiApiKey) {
+        headers['x-gemini-api-key'] = data.profile.customGeminiApiKey;
+      }
+
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           message: cleanText,
           language: lang,
           domain,
           model,
           context: scopedContext,
-          history: messages.slice(-5).map((m) => ({ role: m.role, content: m.content })),
+          history: messages.slice(-6).map((m) => ({ role: m.role, content: m.content })),
         }),
       });
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json.error || 'LIFE AI error');
+        throw new Error(json.error || 'KYVORA AI error');
       }
 
       const tokensUsed = Number(json.tokensUsed || 0);
@@ -165,7 +205,7 @@ export const LifeAiModule: React.FC = () => {
     const p = msg.proposal;
     if (p.type === 'add_expense') {
       await addExpense({
-        description: String(p.payload.description || 'Expense'),
+        description: String(p.payload.description || 'مصروف'),
         amountPiasters: egpToPiasters(Number(p.payload.amountEgp || 0)),
         currency: 'EGP',
         category: String(p.payload.category || 'other'),
@@ -176,13 +216,21 @@ export const LifeAiModule: React.FC = () => {
       });
     } else if (p.type === 'add_task') {
       await addTask({
-        title: String(p.payload.title || 'New Task'),
+        title: String(p.payload.title || 'مهمة جديدة'),
         priority: (p.payload.priority as TaskPriority) || 'medium',
         category: (p.payload.category as TaskCategory) || 'deep_work',
         status: 'todo',
         deadline: TODAY_ISO,
         estimatedMinutes: Number(p.payload.estimatedMinutes || 45),
         actualMinutes: 0,
+      });
+    } else if (p.type === 'add_habit') {
+      await addHabit({
+        title: String(p.payload.title || 'عادة جديدة'),
+        category: (p.payload.category as HabitCategory) || 'productivity',
+        timeOfDay: (p.payload.timeOfDay as HabitTimeOfDay) || 'anytime',
+        frequency: 'daily',
+        color: 'emerald',
       });
     }
     setMessages((prev) =>
@@ -192,14 +240,16 @@ export const LifeAiModule: React.FC = () => {
 
   const quickPrompts = isAr
     ? [
-        'لخّص وضعي المالي هذا الشهر واقترح تحسين للميزانية',
-        'رتّب مهامي المتبقية حسب ذروة تركيزي الصباحية',
-        'سجّل مصروف 120 جنيه قهوة وشاي النهارده',
+        'حلل لي وضعي اليوم: عاداتي ومهامي ومصروفي',
+        'اقترح لي 3 عادات يومية ترفع طاقتي وتركيزي',
+        'سجل لي عادة جديدة: شرب 2 لتر ماء يومياً',
+        'سجل لي مصروف 80 جنيه قهوة النهارده',
       ]
     : [
-        'Summarize my monthly cash flow and budget improvements',
-        'Prioritize my remaining tasks around my morning peak',
-        'Add an expense of 120 EGP for coffee today',
+        'Analyze my day: habits, tasks, and cash flow',
+        'Suggest 3 high-impact daily habits',
+        'Add a new habit: Drink 2L water daily',
+        'Add an expense: 80 EGP for coffee',
       ];
 
   return (
@@ -267,8 +317,10 @@ export const LifeAiModule: React.FC = () => {
             onChange={(e) => setModel(e.target.value as AiModelId)}
             className="min-h-[36px] px-3 rounded-xl bg-[#0B0D10] border border-[#232A33] text-xs font-mono-nums text-[#F4F6F8]"
           >
-            <option value="gemini-3.1-flash-lite">Gemini Flash-Lite ({isAr ? 'سريع واقتصادي' : 'Fast / Low Cost'})</option>
-            <option value="gemini-4-hydrogen">Gemini Flash ({isAr ? 'تحليل أعمق' : 'Deep Analysis'})</option>
+            <option value="gemini-3.5-flash">Gemini 3.5 Flash ({isAr ? 'الأذكى والأسرع' : 'Smartest & Fastest'})</option>
+            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite ({isAr ? 'خفيف وسريع' : 'Lightweight'})</option>
+            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+            <option value="gemini-3.8-flash">Gemini 3.8 Flash ({isAr ? 'تجريبي متقدم' : 'Advanced Preview'})</option>
           </select>
         </div>
       </div>

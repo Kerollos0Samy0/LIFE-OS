@@ -47,8 +47,9 @@ export const ConnectionsSettingsModule: React.FC<ConnectionsSettingsProps> = ({ 
   const [smartwatch, setSmartwatch] = useState(data.profile.smartwatch);
   const [stepTarget, setStepTarget] = useState(String(data.profile.dailyStepTarget));
   const [liabilitiesEgp, setLiabilitiesEgp] = useState(String(piastersToEgp(data.profile.liabilitiesPiasters)));
-  const [aiModel, setAiModel] = useState<AiModelId>(data.profile.aiDefaultModel);
+  const [aiModel, setAiModel] = useState<AiModelId>(data.profile.aiDefaultModel || 'gemini-3.5-flash');
   const [aiLimit, setAiLimit] = useState(String(data.profile.aiDailyLimit));
+  const [customApiKey, setCustomApiKey] = useState(data.profile.customGeminiApiKey || '');
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -110,6 +111,7 @@ export const ConnectionsSettingsModule: React.FC<ConnectionsSettingsProps> = ({ 
       liabilitiesPiasters: egpToPiasters(Math.max(0, Number(liabilitiesEgp) || 0)),
       aiDefaultModel: aiModel,
       aiDailyLimit: Math.max(5, Math.min(500, Number(aiLimit) || 40)),
+      customGeminiApiKey: customApiKey.trim() || undefined,
     });
     setSettingsSaved(true);
     setTimeout(() => setSettingsSaved(false), 1800);
@@ -348,11 +350,31 @@ export const ConnectionsSettingsModule: React.FC<ConnectionsSettingsProps> = ({ 
             </div>
           </div>
           <div>
-            <label htmlFor="set-ai-model" className="block text-xs text-[#8E99A8] mb-1">{isAr ? 'نموذج LIFE AI الافتراضي' : 'Default LIFE AI Model'}</label>
+            <label htmlFor="set-ai-model" className="block text-xs text-[#8E99A8] mb-1">{isAr ? 'نموذج KYVORA AI الافتراضي' : 'Default KYVORA AI Model'}</label>
             <select id="set-ai-model" value={aiModel} onChange={(e) => setAiModel(e.target.value as AiModelId)} className="w-full min-h-[44px] px-3 rounded-xl bg-[#0B0D10] border border-[#232A33] text-sm text-[#F4F6F8]">
-              <option value="gemini-3.1-flash-lite">Gemini Flash-Lite</option>
-              <option value="gemini-4-hydrogen">Gemini Flash</option>
+              <option value="gemini-3.5-flash">Gemini 3.5 Flash ({isAr ? 'الأذكى والأسرع — مستحسن' : 'Smartest & Fastest'})</option>
+              <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite ({isAr ? 'خفيف وسريع' : 'Lightweight'})</option>
+              <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+              <option value="gemini-3.8-flash">Gemini 3.8 Flash ({isAr ? 'تجريبي متقدم' : 'Advanced Preview'})</option>
             </select>
+          </div>
+          <div>
+            <label htmlFor="set-ai-key" className="block text-xs text-[#8E99A8] mb-1">
+              {isAr ? 'مفتاح Google Gemini API الشخصي (اختياري)' : 'Personal Google Gemini API Key (Optional)'}
+            </label>
+            <input
+              id="set-ai-key"
+              type="password"
+              placeholder="AIzaSy... أو الصق مفتاحك هنا"
+              value={customApiKey}
+              onChange={(e) => setCustomApiKey(e.target.value)}
+              className="w-full min-h-[44px] px-3.5 rounded-xl bg-[#0B0D10] border border-[#232A33] text-sm font-mono text-[#F4F6F8] focus:border-emerald-500/60"
+            />
+            <p className="text-[11px] text-[#8E99A8] mt-1">
+              {isAr
+                ? 'يمكنك الحصول على مفتاح شخصي مجاني من aistudio.google.com للعمل بدون أي انقطاع أو حدود مشتركة.'
+                : 'Get a free key from aistudio.google.com to run Gemini without limits.'}
+            </p>
           </div>
           <div>
             <label htmlFor="set-ai-limit" className="block text-xs text-[#8E99A8] mb-1">{isAr ? 'الحد اليومي لطلبات AI' : 'Daily AI Request Limit'}</label>

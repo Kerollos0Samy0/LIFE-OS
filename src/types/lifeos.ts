@@ -14,7 +14,11 @@ export type NavDestination =
   | 'settings';
 
 export type PeakConcentration = 'morning' | 'afternoon' | 'evening';
-export type AiModelId = 'gemini-3.1-flash-lite' | 'gemini-4-hydrogen';
+export type AiModelId =
+  | 'gemini-3.5-flash'
+  | 'gemini-3.5-flash-lite'
+  | 'gemini-3.1-flash-lite'
+  | 'gemini-3.8-flash';
 
 export interface UserProfile {
   userId: string;
@@ -34,6 +38,7 @@ export interface UserProfile {
   aiDefaultModel: AiModelId;
   aiDailyLimit: number;
   liabilitiesPiasters: number;
+  customGeminiApiKey?: string;
   customCategories?: string[];
 }
 
@@ -270,7 +275,7 @@ export interface ParsedExpenseProposal {
 }
 
 export interface AiChatActionProposal {
-  type: 'add_expense' | 'add_task';
+  type: 'add_expense' | 'add_task' | 'add_habit';
   summary: string;
   payload: Record<string, unknown>;
 }

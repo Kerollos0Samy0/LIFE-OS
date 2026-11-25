@@ -1404,8 +1404,8 @@ export const LifeOsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         dateKey: TODAY_ISO,
         requestsToday: prev.aiUsage.requestsToday + 1,
         tokensThisMonth: prev.aiUsage.tokensThisMonth + Math.max(0, tokens),
-        flashLiteCalls: prev.aiUsage.flashLiteCalls + (model === 'gemini-3.1-flash-lite' ? 1 : 0),
-        flashCalls: prev.aiUsage.flashCalls + (model === 'gemini-4-hydrogen' ? 1 : 0),
+        flashLiteCalls: prev.aiUsage.flashLiteCalls + (model === 'gemini-3.1-flash-lite' || model === 'gemini-3.5-flash-lite' ? 1 : 0),
+        flashCalls: prev.aiUsage.flashCalls + (model === 'gemini-3.5-flash' || model === 'gemini-3.8-flash' ? 1 : 0),
       },
     }));
   }, []);

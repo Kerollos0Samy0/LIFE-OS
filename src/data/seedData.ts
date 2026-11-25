@@ -20,7 +20,7 @@ export function createEmptyDataset(userId = 'local-demo-user'): LifeOsDataset {
       smartphone: '',
       smartwatch: '',
       dailyStepTarget: 8000,
-      aiDefaultModel: 'gemini-3.1-flash-lite',
+      aiDefaultModel: 'gemini-3.5-flash',
       aiDailyLimit: 40,
       liabilitiesPiasters: 0,
       customCategories: [],
@@ -66,7 +66,7 @@ export function createInitialSeedDataset(userId = 'local-demo-user'): LifeOsData
       smartphone: 'Android',
       smartwatch: 'Xiaomi Smart Band',
       dailyStepTarget: 8000,
-      aiDefaultModel: 'gemini-3.1-flash-lite',
+      aiDefaultModel: 'gemini-3.5-flash',
       aiDailyLimit: 40,
       liabilitiesPiasters: 450000, // 4,500 EGP installment balance
       customCategories: [],
