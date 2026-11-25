@@ -191,58 +191,50 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
 
   return (
     <div className="space-y-6">
-      {/* Greeting & Quick Actions Row */}
-      <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      {/* Compact Clean Header & Quick Actions */}
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
         <div>
-          <p className="text-xs text-[#8E99A8] tabular-nums">
-            {TODAY_ISO} · {isCloudMode ? UI_TEXT[lang].auth.cloudSynced : UI_TEXT[lang].auth.localSampleMode}
-          </p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#F4F6F8] mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#F4F6F8]">
             {isAr ? `أهلاً يا ${data.profile.displayName}` : `Welcome back, ${data.profile.displayName}`}
           </h1>
-          <p className="text-sm text-[#8E99A8] mt-1">
-            {isAr
-              ? 'ملخص حي لحالتك المالية، وقتك، صحتك، ومؤشر طاقتك اليوم.'
-              : 'Live snapshot of your finances, time, health, and daily energy.'}
-          </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
             onClick={onOpenVoiceExpense}
-            className="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-500 text-[#07110C] font-semibold text-sm hover:bg-emerald-400 transition-colors flex items-center gap-2 whitespace-nowrap"
+            className="min-h-[36px] px-3.5 py-1.5 rounded-xl bg-emerald-500 text-[#07110C] font-semibold text-xs hover:bg-emerald-400 transition-colors flex items-center gap-1.5 shadow-sm whitespace-nowrap"
           >
-            <Mic className="w-4 h-4" />
-            {isAr ? 'سجّل مصروف بالصوت' : 'Voice Expense'}
+            <Mic className="w-3.5 h-3.5" />
+            <span>{isAr ? 'سجّل بالصوت' : 'Voice'}</span>
           </button>
           <button
             type="button"
             onClick={() => setMicroGoalModalOpen(true)}
             data-testid="open-micro-goal-modal"
-            className="min-h-[44px] px-4 py-2 rounded-xl bg-[#13171C] border border-[#232A33] text-sm font-medium text-[#E2E8F0] hover:border-emerald-500/50 transition-colors flex items-center gap-2 whitespace-nowrap"
+            className="min-h-[36px] px-3 py-1.5 rounded-xl bg-[#13171C] border border-[#232A33] text-xs font-medium text-[#C8D0DC] hover:border-emerald-500/50 hover:text-emerald-400 transition-colors flex items-center gap-1.5 whitespace-nowrap"
           >
-            <Target className="w-4 h-4 text-emerald-400" />
-            {isAr ? 'هدف اليوم المصغّر' : 'Daily Micro-Goal'}
+            <Target className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{isAr ? 'هدف اليوم' : 'Daily Goal'}</span>
           </button>
           <button
             type="button"
             onClick={() => onNavigate('ai')}
-            className="min-h-[44px] px-4 py-2 rounded-xl bg-[#13171C] border border-[#232A33] text-sm font-medium text-[#E2E8F0] hover:border-emerald-500/50 transition-colors flex items-center gap-2 whitespace-nowrap"
+            className="min-h-[36px] px-3 py-1.5 rounded-xl bg-[#13171C] border border-[#232A33] text-xs font-medium text-[#C8D0DC] hover:border-emerald-500/50 hover:text-emerald-400 transition-colors flex items-center gap-1.5 whitespace-nowrap"
           >
-            <Sparkles className="w-4 h-4 text-emerald-400" />
-            {isAr ? 'اسأل KYVORA AI' : 'Ask KYVORA AI'}
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            <span>KYVORA AI</span>
           </button>
         </div>
       </section>
 
-      {/* Daily Micro-Goal Progress Card (Top of HomeDashboard) */}
-      <section
-        aria-label={isAr ? 'هدف اليوم المصغّر' : 'Daily Micro-Goal'}
-        data-testid="daily-micro-goal-card"
-        className="bg-[#13171C] border border-[#232A33] rounded-2xl p-5 sm:p-6"
-      >
-        {todayMicroGoal ? (
+      {/* Daily Micro-Goal Progress Card (Rendered only when set) */}
+      {todayMicroGoal ? (
+        <section
+          aria-label={isAr ? 'هدف اليوم المصغّر' : 'Daily Micro-Goal'}
+          data-testid="daily-micro-goal-card"
+          className="bg-[#13171C] border border-[#232A33] rounded-2xl p-4 sm:p-5"
+        >
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
               <div className="space-y-1 min-w-0">
@@ -359,29 +351,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
               </div>
             </div>
           </div>
-        ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-xs text-[#8E99A8] flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5 text-emerald-400" />
-                {isAr ? 'هدف اليوم المصغّر' : 'Daily Micro-Goal'}
-              </p>
-              <p className="text-sm font-medium text-[#F4F6F8] mt-1">
-                {isAr
-                  ? 'لم تحدد هدفاً مصغّراً لليوم بعد — اختر خطوة واحدة واضحة لتركّز عليها.'
-                  : 'No daily micro-goal set yet — pick one focused target to anchor your day.'}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setMicroGoalModalOpen(true)}
-              className="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-500 text-[#07110C] font-semibold text-xs sm:text-sm hover:bg-emerald-400 transition-colors whitespace-nowrap shrink-0 self-start sm:self-auto"
-            >
-              {isAr ? 'تحديد هدف اليوم' : 'Set Daily Micro-Goal'}
-            </button>
-          </div>
-        )}
-      </section>
+        </section>
+      ) : null}
 
       {/* Daily Habits Quick Checklist */}
       <section
