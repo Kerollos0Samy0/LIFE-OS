@@ -69,7 +69,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
     recordAiUsage,
     isCloudMode,
     signInWithGoogle,
-    seedCloudFromSample,
     updateDailyMicroGoalProgress,
     toggleHabitForDate,
   } = useLifeOs();
@@ -436,13 +435,20 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
             })}
           </div>
         ) : (
-          <div className="text-center py-4 text-xs text-[#8E99A8]">
-            <p>{isAr ? 'اضغط على "عرض وتعديل العادات" لإضافة أول عادة يومية لك!' : 'Click "Manage Habits" to add your first daily habit!'}</p>
+          <div className="text-center py-6 border border-dashed border-[#232A33] rounded-xl text-xs text-[#8E99A8] space-y-2">
+            <p>{isAr ? 'لا توجد عادات مسجلة بعد — ابدأ يومك بإضافة أول عادة!' : 'No habits tracked yet — start your day by adding your first habit!'}</p>
+            <button
+              type="button"
+              onClick={() => onNavigate('habits')}
+              className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-semibold transition-colors"
+            >
+              {isAr ? '+ إضافة عادة جديدة' : '+ Add New Habit'}
+            </button>
           </div>
         )}
       </section>
 
-      {/* Honest Cloud Sync / Empty Cloud Notice */}
+      {/* Cloud Sync Notice (Offline only) */}
       {!isCloudMode ? (
         <div className="bg-[#13171C] border border-[#232A33] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <p className="text-xs sm:text-sm text-[#A9B3C1] leading-relaxed">
@@ -454,21 +460,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
             className="min-h-[40px] px-4 py-2 rounded-xl border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10 text-xs font-semibold transition-colors whitespace-nowrap shrink-0"
           >
             {UI_TEXT[lang].auth.signInGoogle}
-          </button>
-        </div>
-      ) : data.expenseRecords.length === 0 && data.incomeRecords.length === 0 ? (
-        <div className="bg-[#13171C] border border-[#232A33] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <p className="text-xs sm:text-sm text-[#A9B3C1]">
-            {isAr
-              ? 'حسابك السحابي جاهز وفارغ حالياً. يمكنك البدء بإضافة سجلاتك أو استيراد بيانات بداية نموذجية لتجربة المنصة.'
-              : 'Your cloud workspace is empty. Start adding records or load starter sample data to explore.'}
-          </p>
-          <button
-            type="button"
-            onClick={() => void seedCloudFromSample()}
-            className="min-h-[40px] px-4 py-2 rounded-xl bg-emerald-500 text-[#07110C] text-xs font-semibold hover:bg-emerald-400 transition-colors whitespace-nowrap shrink-0"
-          >
-            {isAr ? 'استيراد بيانات البداية' : 'Load Starter Data'}
           </button>
         </div>
       ) : null}
@@ -537,13 +528,13 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
               </p>
               <div className="flex items-baseline gap-2.5 mt-2">
                 <span className="text-3xl font-bold font-mono-nums text-[#F4F6F8]">
-                  {metrics.energy.estimatedScore !== null ? `${metrics.energy.estimatedScore}%` : UI_TEXT[lang].common.unavailable}
+                  {metrics.energy.estimatedScore !== null ? `${metrics.energy.estimatedScore}%` : '0%'}
                 </span>
                 <span className="text-xs text-[#8E99A8]">
                   {metrics.energy.level === 'high'
                     ? isAr ? 'طاقة مرتفعة' : 'High readiness'
                     : metrics.energy.level === 'moderate'
-                      ? isAr ? 'طاقة متوسطة' : 'Moderate'
+                      ? (metrics.energy.estimatedScore !== null ? (isAr ? 'طاقة متوسطة' : 'Moderate') : (isAr ? 'جاهز للتسجيل' : 'Ready to track'))
                       : metrics.energy.level === 'low'
                         ? isAr ? 'يُنصح بالراحة' : 'Prioritize recovery'
                         : ''}
@@ -606,16 +597,22 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
           </div>
 
           <div className="pt-3 border-t border-[#232A33] space-y-2">
-            {metrics.todayTasks.slice(0, 3).map((t) => (
-              <div key={t.id} className="flex items-center justify-between text-xs py-1">
-                <span className={t.status === 'completed' ? 'line-through text-[#6C7787]' : 'text-[#E2E8F0]'}>
-                  {t.title}
-                </span>
-                <span className="font-mono-nums text-[#8E99A8] shrink-0 ms-3">
-                  {t.scheduledStart || '—'} · {t.estimatedMinutes}{isAr ? 'د' : 'm'}
-                </span>
-              </div>
-            ))}
+            {metrics.todayTasks.length > 0 ? (
+              metrics.todayTasks.slice(0, 3).map((t) => (
+                <div key={t.id} className="flex items-center justify-between text-xs py-1">
+                  <span className={t.status === 'completed' ? 'line-through text-[#6C7787]' : 'text-[#E2E8F0]'}>
+                    {t.title}
+                  </span>
+                  <span className="font-mono-nums text-[#8E99A8] shrink-0 ms-3">
+                    {t.scheduledStart || '—'} · {t.estimatedMinutes}{isAr ? 'د' : 'm'}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-[#8E99A8] py-1 text-center">
+                {isAr ? 'لا توجد مهام مسجلة لهذا اليوم' : 'No tasks scheduled for today'}
+              </p>
+            )}
           </div>
         </div>
 
@@ -642,7 +639,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
               <p className="text-lg font-bold font-mono-nums text-[#F4F6F8] mt-1">
                 {metrics.latestHealth?.sleepHours != null
                   ? `${metrics.latestHealth.sleepHours} ${isAr ? 'س' : 'h'}`
-                  : UI_TEXT[lang].common.unavailable}
+                  : (isAr ? '0 س' : '0 h')}
               </p>
             </div>
             <div>
@@ -650,7 +647,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
               <p className="text-lg font-bold font-mono-nums text-[#F4F6F8] mt-1">
                 {metrics.latestHealth?.steps != null
                   ? metrics.latestHealth.steps.toLocaleString('en-US')
-                  : UI_TEXT[lang].common.unavailable}
+                  : '0'}
               </p>
             </div>
             <div>
@@ -658,7 +655,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
               <p className="text-lg font-bold font-mono-nums text-[#F4F6F8] mt-1">
                 {metrics.latestHealth?.activeCalories != null
                   ? `${metrics.latestHealth.activeCalories}`
-                  : UI_TEXT[lang].common.unavailable}
+                  : '0'}
               </p>
             </div>
             <div>
@@ -666,7 +663,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
               <p className="text-lg font-bold font-mono-nums text-[#F4F6F8] mt-1">
                 {metrics.latestHealth?.restingHeartRate != null
                   ? `${metrics.latestHealth.restingHeartRate} bpm`
-                  : UI_TEXT[lang].common.unavailable}
+                  : '--'}
               </p>
             </div>
           </div>
@@ -676,7 +673,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate, onOpen
               {isAr ? 'المصدر:' : 'Source:'}{' '}
               {metrics.latestHealth?.source === 'manual'
                 ? isAr ? 'إدخال يدوي' : 'Manual log'
-                : metrics.latestHealth?.source || UI_TEXT[lang].common.unavailable}
+                : metrics.latestHealth?.source || (isAr ? 'لا توجد سجلات بعد' : 'No records yet')}
             </span>
             <span className="font-mono-nums">
               {isAr ? 'هدف الخطوات:' : 'Goal:'}{' '}

@@ -5,6 +5,7 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
   onSnapshot,
   query,
   serverTimestamp,
@@ -21,7 +22,7 @@ import {
   signInWithGooglePopup,
   signOutFirebase,
 } from '../lib/firebase';
-import { createInitialSeedDataset, TODAY_ISO } from '../data/seedData';
+import { createEmptyDataset, createInitialSeedDataset, TODAY_ISO } from '../data/seedData';
 import type {
   AiModelId,
   AppUsageLog,
@@ -43,7 +44,7 @@ import type {
   UserProfile,
 } from '../types/lifeos';
 
-const LOCAL_STORAGE_KEY = 'life_os_workspace_v1';
+const LOCAL_STORAGE_KEY = 'kyvora_workspace_v2';
 
 function makeSafeId(prefix: string): string {
   const rand = Math.random().toString(36).slice(2, 8);
@@ -52,23 +53,41 @@ function makeSafeId(prefix: string): string {
 
 function loadLocalDataset(): LifeOsDataset {
   try {
+    // If old v1 exists, remove it so user starts fresh on clean slate
+    if (localStorage.getItem('life_os_workspace_v1')) {
+      localStorage.removeItem('life_os_workspace_v1');
+    }
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<LifeOsDataset>;
-      const fallback = createInitialSeedDataset();
-      return {
-        ...fallback,
-        ...parsed,
-        profile: { ...fallback.profile, ...(parsed.profile || {}) },
-        dailyMicroGoals: Array.isArray(parsed.dailyMicroGoals) ? parsed.dailyMicroGoals : fallback.dailyMicroGoals,
-        habits: Array.isArray(parsed.habits) ? parsed.habits : fallback.habits,
-        aiUsage: { ...fallback.aiUsage, ...(parsed.aiUsage || {}) },
-      };
+      // If the stored data still contains the legacy sample mock dataset, discard it
+      const hasLegacyDemoSeed =
+        (Array.isArray(parsed.habits) && parsed.habits.some((h) => h.id === 'habit-1')) ||
+        (Array.isArray(parsed.incomeRecords) && parsed.incomeRecords.some((i) => i.id === 'inc-salary-nov')) ||
+        (parsed.profile && parsed.profile.displayName === 'كريم سامي');
+
+      if (!hasLegacyDemoSeed) {
+        const fallback = createEmptyDataset();
+        return {
+          ...fallback,
+          ...parsed,
+          profile: { ...fallback.profile, ...(parsed.profile || {}) },
+          dailyMicroGoals: Array.isArray(parsed.dailyMicroGoals) ? parsed.dailyMicroGoals : fallback.dailyMicroGoals,
+          habits: Array.isArray(parsed.habits) ? parsed.habits : fallback.habits,
+          aiUsage: { ...fallback.aiUsage, ...(parsed.aiUsage || {}) },
+        };
+      }
     }
   } catch {
-    // Fallback to clean seed dataset
+    // Fallback to clean empty dataset
   }
-  return createInitialSeedDataset();
+  const clean = createEmptyDataset();
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(clean));
+  } catch {
+    // Ignore storage quota
+  }
+  return clean;
 }
 
 interface LifeOsContextValue {
@@ -219,7 +238,7 @@ export const LifeOsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       try {
         const snap = await getDoc(profileRef);
         if (!snap.exists()) {
-          const defaults = createInitialSeedDataset(uid).profile;
+          const defaults = createEmptyDataset(uid).profile;
           await setDoc(profileRef, {
             userId: uid,
             displayName: (user.displayName || defaults.displayName).slice(0, 120),
@@ -1418,10 +1437,56 @@ export const LifeOsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   const resetAllData = useCallback(async () => {
-    const fresh = createInitialSeedDataset(user?.uid || 'local-demo-user');
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    setData(fresh);
-  }, [user]);
+    const uid = user?.uid;
+    const clean = createEmptyDataset(uid || 'local-demo-user');
+    if (user?.displayName) {
+      clean.profile.displayName = user.displayName;
+    }
+    if (user?.email) {
+      clean.profile.email = user.email;
+    }
+
+    try {
+      localStorage.removeItem('life_os_workspace_v1');
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(clean));
+    } catch {
+      // ignore quota
+    }
+    setData(clean);
+
+    if (uid && isCloudMode) {
+      try {
+        const subcollections = [
+          'income_records',
+          'expense_records',
+          'budgets',
+          'savings_goals',
+          'investments',
+          'tasks',
+          'calendar_events',
+          'focus_sessions',
+          'health_logs',
+          'app_usage',
+          'energy_logs',
+          'goals',
+          'daily_micro_goals',
+          'habits',
+        ];
+
+        for (const subcol of subcollections) {
+          const colRef = collection(db, 'users', uid, subcol);
+          const snap = await getDocs(colRef);
+          if (!snap.empty) {
+            const batch = writeBatch(db);
+            snap.docs.forEach((d) => batch.delete(d.ref));
+            await batch.commit();
+          }
+        }
+      } catch (err) {
+        console.error('Error clearing cloud subcollections:', err);
+      }
+    }
+  }, [user, isCloudMode]);
 
   return (
     <LifeOsContext.Provider

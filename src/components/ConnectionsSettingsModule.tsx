@@ -398,7 +398,7 @@ export const ConnectionsSettingsModule: React.FC<ConnectionsSettingsProps> = ({ 
             onClick={() => setConfirmReset(true)}
             className="min-h-[42px] px-4 rounded-xl border border-red-500/40 text-xs font-semibold text-red-400 hover:bg-red-500/10"
           >
-            {isAr ? 'إعادة ضبط البيانات المحلية' : 'Reset Local Data'}
+            {isAr ? 'تصفير كل البيانات للبدء على نظيف' : 'Zero Reset (Start Clean)'}
           </button>
         </div>
         {importStatus ? <p className="text-xs text-emerald-400">{importStatus}</p> : null}
@@ -406,13 +406,13 @@ export const ConnectionsSettingsModule: React.FC<ConnectionsSettingsProps> = ({ 
 
       <ConfirmDialog
         open={confirmReset}
-        title={isAr ? 'تأكيد إعادة ضبط البيانات' : 'Confirm Data Reset'}
+        title={isAr ? 'تأكيد تصفير كل البيانات' : 'Confirm Data Zero-Reset'}
         description={
           isAr
-            ? 'سيتم مسح التعديلات المحلية وإعادة البيانات للوضع الافتراضي الأولي. هل أنت متأكد؟'
-            : 'This resets local workspace edits back to the initial starter dataset. Continue?'
+            ? 'سيتم تصفير كل الأرقام والعادات والملخصات بالكامل للبدء من جديد على نظيف. هل أنت متأكد؟'
+            : 'This will reset all records, habits, and summaries to zero so you can start completely clean. Are you sure?'
         }
-        confirmLabel={isAr ? 'نعم، إعادة الضبط' : 'Yes, Reset'}
+        confirmLabel={isAr ? 'نعم، تصفير كل البيانات' : 'Yes, Zero-Reset'}
         cancelLabel={isAr ? 'إلغاء' : 'Cancel'}
         tone="danger"
         onConfirm={async () => {

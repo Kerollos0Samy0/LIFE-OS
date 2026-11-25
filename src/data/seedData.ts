@@ -1,7 +1,53 @@
 import type { LifeOsDataset } from '../types/lifeos';
 
-export const TODAY_ISO = '2026-11-22';
-export const CURRENT_MONTH = '2026-11';
+export const TODAY_ISO = new Date().toISOString().slice(0, 10);
+export const CURRENT_MONTH = new Date().toISOString().slice(0, 7);
+
+export function createEmptyDataset(userId = 'local-demo-user'): LifeOsDataset {
+  return {
+    profile: {
+      userId,
+      displayName: 'Kerollos Samy',
+      email: '',
+      language: 'ar',
+      currency: 'EGP',
+      dailyWorkHours: 8,
+      workStartHour: 9,
+      workEndHour: 17,
+      targetSleepHours: 8,
+      peakConcentration: 'morning',
+      financialGoal: '',
+      smartphone: '',
+      smartwatch: '',
+      dailyStepTarget: 8000,
+      aiDefaultModel: 'gemini-3.1-flash-lite',
+      aiDailyLimit: 40,
+      liabilitiesPiasters: 0,
+      customCategories: [],
+    },
+    incomeRecords: [],
+    expenseRecords: [],
+    budgets: [],
+    savingsGoals: [],
+    investments: [],
+    tasks: [],
+    calendarEvents: [],
+    focusSessions: [],
+    healthLogs: [],
+    appUsageLogs: [],
+    energyLogs: [],
+    goals: [],
+    dailyMicroGoals: [],
+    habits: [],
+    aiUsage: {
+      dateKey: TODAY_ISO,
+      requestsToday: 0,
+      tokensThisMonth: 0,
+      flashLiteCalls: 0,
+      flashCalls: 0,
+    },
+  };
+}
 
 export function createInitialSeedDataset(userId = 'local-demo-user'): LifeOsDataset {
   return {
