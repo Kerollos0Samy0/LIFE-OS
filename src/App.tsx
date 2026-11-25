@@ -3,6 +3,7 @@ import {
   Activity,
   BarChart3,
   Clock,
+  Flame,
   Globe,
   Home,
   Link2,
@@ -17,6 +18,7 @@ import {
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LifeOsProvider, useLifeOs } from './context/LifeOsContext';
 import { HomeDashboard } from './components/HomeDashboard';
+import { HabitsModule } from './components/HabitsModule';
 import { FinanceModule } from './components/FinanceModule';
 import { TimeModule } from './components/TimeModule';
 import { HealthEnergyModule } from './components/HealthEnergyModule';
@@ -31,6 +33,7 @@ import type { NavDestination } from './types/lifeos';
 
 const PRIMARY_NAV: Array<{ id: NavDestination; icon: React.ComponentType<{ className?: string }> }> = [
   { id: 'home', icon: Home },
+  { id: 'habits', icon: Flame },
   { id: 'finance', icon: Wallet },
   { id: 'time', icon: Clock },
   { id: 'health', icon: Activity },
@@ -220,6 +223,7 @@ function LifeOsShell() {
               onOpenVoiceExpense={() => setVoiceModalOpen(true)}
             />
           ) : null}
+          {activeNav === 'habits' ? <HabitsModule /> : null}
           {activeNav === 'finance' ? (
             <FinanceModule onOpenVoiceExpense={() => setVoiceModalOpen(true)} />
           ) : null}
@@ -234,10 +238,10 @@ function LifeOsShell() {
         </main>
       </div>
 
-      {/* Mobile Fixed 5-Destination Bottom Navigation Bar (64px) */}
+      {/* Mobile Fixed 6-Destination Bottom Navigation Bar (64px) */}
       <nav
         aria-label={isAr ? 'شريط التنقل السفلي' : 'Bottom Navigation'}
-        className="lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 bg-[#0F1216]/95 backdrop-blur-md border-t border-[#232A33] grid grid-cols-5 items-center px-1 no-print"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 bg-[#0F1216]/95 backdrop-blur-md border-t border-[#232A33] grid grid-cols-6 items-center px-0.5 no-print"
       >
         {PRIMARY_NAV.map(({ id, icon: Icon }) => {
           const active = activeNav === id;

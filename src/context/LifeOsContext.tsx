@@ -31,6 +31,7 @@ import type {
   EnergyLog,
   ExpenseRecord,
   FocusSession,
+  HabitRecord,
   HealthLog,
   IncomeRecord,
   InvestmentAsset,
@@ -60,6 +61,7 @@ function loadLocalDataset(): LifeOsDataset {
         ...parsed,
         profile: { ...fallback.profile, ...(parsed.profile || {}) },
         dailyMicroGoals: Array.isArray(parsed.dailyMicroGoals) ? parsed.dailyMicroGoals : fallback.dailyMicroGoals,
+        habits: Array.isArray(parsed.habits) ? parsed.habits : fallback.habits,
         aiUsage: { ...fallback.aiUsage, ...(parsed.aiUsage || {}) },
       };
     }
@@ -117,12 +119,51 @@ interface LifeOsContextValue {
   upsertDailyMicroGoal: (item: Omit<DailyMicroGoal, 'id' | 'userId'>) => Promise<void>;
   updateDailyMicroGoalProgress: (id: string, currentValue: number) => Promise<void>;
   deleteDailyMicroGoal: (id: string) => Promise<void>;
+  // Habits
+  addHabit: (item: Omit<HabitRecord, 'id' | 'userId' | 'streak' | 'bestStreak' | 'completedDates' | 'createdAt'>) => Promise<void>;
+  toggleHabitForDate: (habitId: string, dateStr?: string) => Promise<void>;
+  editHabit: (habitId: string, patch: Partial<Omit<HabitRecord, 'id' | 'userId'>>) => Promise<void>;
+  deleteHabit: (habitId: string) => Promise<void>;
   // AI Usage tracking
   recordAiUsage: (model: AiModelId, tokens: number) => void;
   // Backup / Reset
   exportJsonBackup: () => string;
   importJsonBackup: (jsonStr: string) => boolean;
   resetAllData: () => Promise<void>;
+}
+
+function computeHabitStreaks(dates: string[]): { streak: number; bestStreak: number } {
+  if (!dates || dates.length === 0) return { streak: 0, bestStreak: 0 };
+  const uniqueSorted = Array.from(new Set(dates)).sort();
+  let maxRun = 1;
+  let currentRun = 1;
+  for (let i = 1; i < uniqueSorted.length; i++) {
+    const prev = new Date(uniqueSorted[i - 1]).getTime();
+    const curr = new Date(uniqueSorted[i]).getTime();
+    const diffDays = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+    if (diffDays === 1) {
+      currentRun++;
+      if (currentRun > maxRun) maxRun = currentRun;
+    } else if (diffDays > 1) {
+      currentRun = 1;
+    }
+  }
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const datesSet = new Set(dates);
+  let streak = 0;
+  const d = new Date(todayStr);
+
+  if (!datesSet.has(todayStr)) {
+    d.setDate(d.getDate() - 1);
+  }
+
+  while (datesSet.has(d.toISOString().slice(0, 10))) {
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+
+  return { streak, bestStreak: Math.max(maxRun, streak) };
 }
 
 const LifeOsContext = createContext<LifeOsContextValue | null>(null);
@@ -267,6 +308,7 @@ export const LifeOsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     bindCollection<EnergyLog>('energy_logs', 'energyLogs');
     bindCollection<PersonalGoal>('goals', 'goals');
     bindCollection<DailyMicroGoal>('daily_micro_goals', 'dailyMicroGoals');
+    bindCollection<HabitRecord>('habits', 'habits');
 
     return () => {
       unsubscribers.forEach((fn) => fn());
@@ -332,6 +374,9 @@ export const LifeOsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
     sample.dailyMicroGoals.forEach(({ id, ...rest }) => {
       batch.set(doc(db, 'users', uid, 'daily_micro_goals', id), { ...rest, userId: uid, createdAt: ts, updatedAt: ts });
+    });
+    (sample.habits || []).forEach(({ id, ...rest }) => {
+      batch.set(doc(db, 'users', uid, 'habits', id), { ...rest, userId: uid, createdAt: ts, updatedAt: ts });
     });
 
     try {
@@ -1217,6 +1262,122 @@ export const LifeOsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     [isCloudMode, user],
   );
 
+  const addHabit = useCallback(
+    async (item: Omit<HabitRecord, 'id' | 'userId' | 'streak' | 'bestStreak' | 'completedDates' | 'createdAt'>) => {
+      const id = makeSafeId('habit');
+      const uid = user?.uid || 'local-demo-user';
+      const nowStr = new Date().toISOString().slice(0, 10);
+      const record: HabitRecord = {
+        ...item,
+        id,
+        userId: uid,
+        streak: 0,
+        bestStreak: 0,
+        completedDates: [],
+        createdAt: nowStr,
+        color: item.color || 'emerald',
+      };
+      if (isCloudMode && user) {
+        const path = `users/${user.uid}/habits/${id}`;
+        try {
+          await setDoc(doc(db, 'users', user.uid, 'habits', id), {
+            ...record,
+            createdAt: serverTimestamp(),
+          });
+        } catch (err) {
+          handleFirestoreError(err, OperationType.WRITE, path);
+        }
+      } else {
+        setData((prev) => ({
+          ...prev,
+          habits: [record, ...(prev.habits || [])],
+        }));
+      }
+    },
+    [isCloudMode, user],
+  );
+
+  const toggleHabitForDate = useCallback(
+    async (habitId: string, dateStr?: string) => {
+      const targetDate = dateStr || new Date().toISOString().slice(0, 10);
+      const existing = (data.habits || []).find((h) => h.id === habitId);
+      if (!existing) return;
+
+      const hasDate = existing.completedDates.includes(targetDate);
+      const nextDates = hasDate
+        ? existing.completedDates.filter((d) => d !== targetDate)
+        : [...existing.completedDates, targetDate];
+
+      const { streak, bestStreak } = computeHabitStreaks(nextDates);
+      const updatedBestStreak = Math.max(existing.bestStreak, bestStreak);
+
+      if (isCloudMode && user) {
+        const path = `users/${user.uid}/habits/${habitId}`;
+        try {
+          await updateDoc(doc(db, 'users', user.uid, 'habits', habitId), {
+            completedDates: nextDates,
+            streak,
+            bestStreak: updatedBestStreak,
+            updatedAt: serverTimestamp(),
+          });
+        } catch (err) {
+          handleFirestoreError(err, OperationType.WRITE, path);
+        }
+      } else {
+        setData((prev) => ({
+          ...prev,
+          habits: (prev.habits || []).map((h) =>
+            h.id === habitId
+              ? { ...h, completedDates: nextDates, streak, bestStreak: updatedBestStreak }
+              : h,
+          ),
+        }));
+      }
+    },
+    [data.habits, isCloudMode, user],
+  );
+
+  const editHabit = useCallback(
+    async (habitId: string, patch: Partial<Omit<HabitRecord, 'id' | 'userId'>>) => {
+      if (isCloudMode && user) {
+        const path = `users/${user.uid}/habits/${habitId}`;
+        try {
+          await updateDoc(doc(db, 'users', user.uid, 'habits', habitId), {
+            ...patch,
+            updatedAt: serverTimestamp(),
+          });
+        } catch (err) {
+          handleFirestoreError(err, OperationType.WRITE, path);
+        }
+      } else {
+        setData((prev) => ({
+          ...prev,
+          habits: (prev.habits || []).map((h) => (h.id === habitId ? { ...h, ...patch } : h)),
+        }));
+      }
+    },
+    [isCloudMode, user],
+  );
+
+  const deleteHabit = useCallback(
+    async (habitId: string) => {
+      if (isCloudMode && user) {
+        const path = `users/${user.uid}/habits/${habitId}`;
+        try {
+          await deleteDoc(doc(db, 'users', user.uid, 'habits', habitId));
+        } catch (err) {
+          handleFirestoreError(err, OperationType.DELETE, path);
+        }
+      } else {
+        setData((prev) => ({
+          ...prev,
+          habits: (prev.habits || []).filter((h) => h.id !== habitId),
+        }));
+      }
+    },
+    [isCloudMode, user],
+  );
+
   const recordAiUsage = useCallback((model: AiModelId, tokens: number) => {
     setData((prev) => ({
       ...prev,
@@ -1306,6 +1467,10 @@ export const LifeOsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         upsertDailyMicroGoal,
         updateDailyMicroGoalProgress,
         deleteDailyMicroGoal,
+        addHabit,
+        toggleHabitForDate,
+        editHabit,
+        deleteHabit,
         recordAiUsage,
         exportJsonBackup,
         importJsonBackup,

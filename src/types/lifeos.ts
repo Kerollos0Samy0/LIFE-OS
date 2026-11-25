@@ -2,6 +2,7 @@ export type Language = 'ar' | 'en';
 
 export type NavDestination =
   | 'home'
+  | 'habits'
   | 'finance'
   | 'time'
   | 'health'
@@ -238,6 +239,26 @@ export interface DailyMicroGoal {
   completed: boolean;
 }
 
+export type HabitCategory = 'health' | 'fitness' | 'productivity' | 'learning' | 'mindfulness' | 'personal';
+export type HabitTimeOfDay = 'anytime' | 'morning' | 'afternoon' | 'evening';
+export type HabitFrequency = 'daily' | 'weekdays' | 'weekends';
+
+export interface HabitRecord {
+  id: string;
+  userId: string;
+  title: string;
+  category: HabitCategory;
+  timeOfDay: HabitTimeOfDay;
+  frequency: HabitFrequency;
+  streak: number; // Current streak in days
+  bestStreak: number; // All-time best streak
+  completedDates: string[]; // List of YYYY-MM-DD dates marked as done
+  createdAt: string; // YYYY-MM-DD
+  color?: string; // emerald, amber, blue, violet, rose, cyan
+  icon?: string; // icon identifier or emoji
+  notes?: string;
+}
+
 export interface ParsedExpenseProposal {
   description: string;
   amountEgp: number;
@@ -288,5 +309,6 @@ export interface LifeOsDataset {
   energyLogs: EnergyLog[];
   goals: PersonalGoal[];
   dailyMicroGoals: DailyMicroGoal[];
+  habits: HabitRecord[];
   aiUsage: AiUsageStats;
 }

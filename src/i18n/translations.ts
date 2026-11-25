@@ -114,15 +114,32 @@ export const GOAL_CATEGORY_LABELS: Record<GoalCategory, { ar: string; en: string
   social: { ar: 'اجتماعي', en: 'Social' },
 };
 
+export const HABIT_CATEGORY_LABELS: Record<string, { ar: string; en: string }> = {
+  health: { ar: 'صحة', en: 'Health' },
+  fitness: { ar: 'لياقة ورياضة', en: 'Fitness' },
+  productivity: { ar: 'إنتاجية وعمل', en: 'Productivity' },
+  learning: { ar: 'تعلم وتطوير', en: 'Learning' },
+  mindfulness: { ar: 'هدوء وتأمل', en: 'Mindfulness' },
+  personal: { ar: 'شخصي', en: 'Personal' },
+};
+
+export const HABIT_TIME_OF_DAY_LABELS: Record<string, { ar: string; en: string }> = {
+  anytime: { ar: 'طوال اليوم', en: 'Anytime' },
+  morning: { ar: 'الصباح', en: 'Morning' },
+  afternoon: { ar: 'الظهيرة', en: 'Afternoon' },
+  evening: { ar: 'المساء', en: 'Evening' },
+};
+
 export const UI_TEXT = {
   ar: {
     brandTagline: 'افهم حياتك. أدر مستقبلك.',
     nav: {
       home: 'الرئيسية',
+      habits: 'العادات',
       finance: 'الماليات',
       time: 'الوقت',
       health: 'الصحة',
-      ai: 'LIFE AI',
+      ai: 'KYVORA AI',
       wellbeing: 'الرفاهية الرقمية',
       goals: 'الأهداف',
       reports: 'التقارير',
@@ -159,10 +176,11 @@ export const UI_TEXT = {
     brandTagline: 'Understand Your Life. Manage Your Future.',
     nav: {
       home: 'Home',
+      habits: 'Habits',
       finance: 'Finance',
       time: 'Time',
       health: 'Health',
-      ai: 'LIFE AI',
+      ai: 'KYVORA AI',
       wellbeing: 'Wellbeing',
       goals: 'Goals',
       reports: 'Reports',
